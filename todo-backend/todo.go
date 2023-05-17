@@ -14,6 +14,7 @@ type Todo struct {
 
 func NewTodo(task string, status bool) Todo {
 	return Todo{
+		ID:     uuid.New(),
 		Task:   task,
 		Status: status,
 	}
@@ -71,6 +72,10 @@ func (t *Todo) SetDone() bool {
 func (t *Todo) SetNotDone() bool {
 	t.Status = false
 	return t.Status
+}
+
+func (t *Todo) ToggleDone() {
+	t.Status = !t.Status
 }
 
 func (t *Todo) GetStatus() bool {
