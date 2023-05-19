@@ -15,7 +15,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "aws-proj-remote-state" {
-  bucket              = "aws-proj-remote-state"
+  bucket              = "aws-proj-remote-state2"
   object_lock_enabled = false
   tags = {
     Name        = "TF State Bucket"

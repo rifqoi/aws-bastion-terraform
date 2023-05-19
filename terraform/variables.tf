@@ -9,6 +9,6 @@ variable "zone" {
 }
 
 variable "instance-type" {
-  default     = "t3-micro"
+  default     = "t3.micro"
   description = "Default instance type of this project"
 }
