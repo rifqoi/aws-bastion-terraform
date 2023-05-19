@@ -1,12 +1,18 @@
+locals {
+  SSH_PORT = 2225
+}
+
 resource "aws_security_group" "bastion-sg" {
   name        = "Bastion Host SG"
   description = "Allow ssh to connect to instances in the private subnet"
   vpc_id      = aws_vpc.rifqoi-vpc.id
 
   # Allow to connect to ssh
+  # Change ssh port to other than 22 for security reason
+  # In this case I changed it to 2222
   ingress {
-    from_port   = 22
-    to_port     = 22
+    from_port   = local.SSH_PORT
+    to_port     = local.SSH_PORT
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -52,8 +58,9 @@ data "aws_ami" "amazon-linux-2-ami" {
 }
 
 resource "aws_network_interface" "bastion-eni" {
-  subnet_id   = aws_subnet.public-subnet-1.id
-  private_ips = ["10.0.1.12"]
+  subnet_id       = aws_subnet.public-subnet-1.id
+  private_ips     = ["10.0.1.12"]
+  security_groups = [aws_security_group.bastion-sg.id]
 
   tags = {
     Name = "bastion_host_eni"
@@ -65,13 +72,33 @@ resource "aws_instance" "bastion-host-ec2" {
   ami               = data.aws_ami.amazon-linux-2-ami.id
   instance_type     = var.instance-type
   availability_zone = var.zone
-  subnet_id         = aws_subnet.public-subnet-1.id
+  /* subnet_id         = aws_subnet.public-subnet-1.id */
+
 
   network_interface {
     network_interface_id = aws_network_interface.bastion-eni.id
     device_index         = 0
   }
 
-  vpc_security_group_ids = [aws_security_group.bastion-sg.id]
-  key_name               = "vockey"
+  user_data = <<EOF
+    #!/bin/bash
+    # Change SSH PORT from 22 to 2225
+    sudo sed -i '/Port 22/a Port ${local.SSH_PORT}' /etc/ssh/sshd_config
+
+    # Restart sshd daemon
+    sudo service sshd restart
+    EOF
+
+  /* provisioner "remote-exec" { */
+  /*   inline = [ */
+  /*     "sudo sed -i 's/Port 22/Port 2225/' /etc/ssh/sshd_config", */
+  /*     "sudo systemctl restart sshd" */
+  /*   ] */
+  /* } */
+
+
+  key_name = "vockey"
+  tags = {
+    "Name" = "bastion-instance"
+  }
 }
