@@ -74,6 +74,11 @@ resource "aws_instance" "bastion-host-ec2" {
   availability_zone = var.zone
   /* subnet_id         = aws_subnet.public-subnet-1.id */
 
+  // This is the only instance profile 
+  // that can be used in AWS Academy Sandbox...
+  // I was wrong...
+  /* iam_instance_profile = "EMR_EC2_DefaultRole" */
+
 
   network_interface {
     network_interface_id = aws_network_interface.bastion-eni.id
@@ -87,15 +92,17 @@ resource "aws_instance" "bastion-host-ec2" {
 
     # Restart sshd daemon
     sudo service sshd restart
+
+    # Install Docker
+    sudo yum update
+    sudo yum install docker
+    sudo usermod -a -G docker ec2-user
+    id ec2-user
+    # Reload a Linux user's group assignments to docker w/o logout
+    newgrp docker
+    sudo systemctl enable docker.service
+    sudo systemctl start docker.service
     EOF
-
-  /* provisioner "remote-exec" { */
-  /*   inline = [ */
-  /*     "sudo sed -i 's/Port 22/Port 2225/' /etc/ssh/sshd_config", */
-  /*     "sudo systemctl restart sshd" */
-  /*   ] */
-  /* } */
-
 
   key_name = "vockey"
   tags = {
