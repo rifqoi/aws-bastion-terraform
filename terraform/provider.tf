@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "aws-proj-remote-state2"
+    bucket = "aws-proj-remote-state"
     region = "us-east-1"
   }
   required_providers {
