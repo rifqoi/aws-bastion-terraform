@@ -175,3 +175,10 @@ resource "aws_route_table_association" "private-rtb-2-assoc" {
   subnet_id      = aws_subnet.private-subnet-2.id
   route_table_id = aws_route_table.private-rtb-2.id
 }
+
+## VPC Endpoint
+resource "aws_vpc_endpoint" "vpc_endpoint_gw" {
+  vpc_id          = aws_vpc.rifqoi-vpc.id
+  service_name    = "com.amazonaws.${var.region}.s3"
+  route_table_ids = [aws_route_table.private-rtb-1.id, aws_route_table.private-rtb-2.id]
+}
